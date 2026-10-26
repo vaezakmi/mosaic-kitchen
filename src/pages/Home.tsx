@@ -18,8 +18,7 @@ const GardenCanvas = lazy(() =>
 );
 
 import { Reveal, SplitReveal } from "@/components/Reveal";
-import { Marquee } from "@/components/Marquee";
-import { DISHES, EVENTS, INFO, REVIEWS, ksh } from "@/data/content";
+import { DISHES, EVENTS, INFO, ksh } from "@/data/content";
 import { useOpenStatus } from "@/hooks/useOpenStatus";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -684,79 +683,6 @@ function EventsTeaser() {
     </section>
   );
 }
-
-/* ─────────────────────────────────────────
-   GUEST REVIEWS
-───────────────────────────────────────── */
-
-function Reviews() {
-  return (
-    <section
-      className="border-y border-white/[0.08] bg-[#0d110d] py-20 md:py-32"
-      aria-label="Guest reviews"
-    >
-      <div className="mx-auto max-w-[1600px] px-5 md:px-10">
-        <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between">
-          <Reveal>
-            <div className="flex flex-wrap items-baseline gap-3">
-              <p className="font-display text-[clamp(3rem,7vw,5.5rem)] font-light leading-[0.9] text-[#f2f0e4]">
-                {INFO.rating}
-              </p>
-
-              <span className="text-3xl text-[#e8a33d]" aria-hidden="true">
-                ★
-              </span>
-
-              <span className="text-lg text-[#8a8d80]">/ 5</span>
-            </div>
-
-            <p className="mt-4 text-sm text-[#96998c]">
-              Based on {INFO.reviewCount} Google reviews
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.1} className="max-w-md md:pb-2">
-            <p className="text-base leading-relaxed text-[#c9ccc0] md:text-right">
-              Loved for our fusion cuisine,
-              <br className="hidden md:block" />
-              garden atmosphere, and relaxed bar.
-            </p>
-          </Reveal>
-        </div>
-      </div>
-
-      {REVIEWS.length > 0 && (
-        <div className="mt-12 overflow-hidden md:mt-14">
-          <Marquee
-            items={REVIEWS.map((review) => ({
-              quote: review.quote,
-              when: review.when,
-            }))}
-            render={(review) => (
-              <figure className="mx-3 w-[290px] shrink-0 rounded-xl border border-white/[0.1] bg-white/[0.03] p-5 sm:mx-5 sm:w-[420px] sm:p-6">
-                <div
-                  className="text-[0.8rem] tracking-[0.25em] text-[#e8a33d]"
-                  aria-label="5 out of 5 stars"
-                >
-                  ★★★★★
-                </div>
-
-                <blockquote className="mt-4 text-[0.95rem] leading-relaxed text-[#d6d8cc]">
-                  “{review.quote}”
-                </blockquote>
-
-                <figcaption className="mt-4 text-xs uppercase tracking-wide text-[#96998c]">
-                  Google review · {review.when}
-                </figcaption>
-              </figure>
-            )}
-          />
-        </div>
-      )}
-    </section>
-  );
-}
-
 /* ─────────────────────────────────────────
    CLOSING CALL TO ACTION
 ───────────────────────────────────────── */
@@ -817,7 +743,6 @@ export default function Home() {
       <Signature />
       <Uniqueness />
       <EventsTeaser />
-      <Reviews />
       <ClosingCta />
     </main>
   );

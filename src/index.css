@@ -4,6 +4,8 @@
 
 /* ── Primitive tokens ─────────────────────────────────────────── */
 :root {
+  color-scheme: dark; /* Fixes native input/scrollbar colors */
+
   /* palette: botanical night garden */
   --p-night: #0b0e0c;        /* near-black, green tint */
   --p-night-2: #10150f;      /* raised night */
@@ -66,16 +68,18 @@ body {
   color: var(--p-night);
 }
 
-/* film grain over everything, very subtle */
+/* ── Optimized Film Grain ─────────────────────────────────────── */
 .grain::after {
   content: "";
   position: fixed;
-  inset: -100%;
-  z-index: 90;
+  inset: 0; /* Fixed from -100% to save massive GPU rendering */
+  z-index: 9999;
   pointer-events: none;
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
   animation: grain-shift 1.2s steps(4) infinite;
+  will-change: transform;
 }
 @keyframes grain-shift {
   0% { transform: translate(0, 0); }
@@ -83,9 +87,6 @@ body {
   50% { transform: translate(1%, -2%); }
   75% { transform: translate(-1%, 2%); }
   100% { transform: translate(0, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .grain::after { animation: none; }
 }
 
 /* ── Typography helpers ───────────────────────────────────────── */
@@ -109,6 +110,7 @@ body {
   line-height: 0.98;
   letter-spacing: -0.02em;
   font-size: clamp(3rem, 9.5vw, 8.5rem);
+  text-wrap: balance; /* Modern CSS for better line breaks */
 }
 .display-xl {
   font-family: var(--font-display);
@@ -116,6 +118,7 @@ body {
   line-height: 1.02;
   letter-spacing: -0.015em;
   font-size: clamp(2.4rem, 6vw, 5.5rem);
+  text-wrap: balance;
 }
 .display-lg {
   font-family: var(--font-display);
@@ -182,6 +185,7 @@ em.accent {
   text-decoration: none;
   border: none;
   cursor: pointer;
+  will-change: transform;
   transition: background 0.25s var(--ease-out), transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
 .btn-primary:hover,
@@ -207,6 +211,7 @@ em.accent {
   text-decoration: none;
   border: 1px solid var(--c-line);
   cursor: pointer;
+  will-change: transform;
   transition: border-color 0.25s var(--ease-out), background 0.25s var(--ease-out), transform 0.25s var(--ease-out);
 }
 .btn-ghost:hover,
@@ -279,15 +284,12 @@ em.accent {
   border-color: var(--c-accent);
   background: rgba(232, 163, 61, 0.05);
 }
-.field-error {
-  border-color: #d4694a;
-}
+.field-error { border-color: #d4694a; }
 select.field option {
   background: var(--p-night-2);
   color: var(--c-text);
 }
 input[type="date"].field::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) sepia(0.4) saturate(3);
   cursor: pointer;
 }
 .error-text {
@@ -305,16 +307,18 @@ input[type="date"].field::-webkit-calendar-picker-indicator {
 }
 .marquee-track {
   display: inline-flex;
+  width: max-content;
   animation: marquee-scroll 46s linear infinite;
   will-change: transform;
 }
-.marquee:hover .marquee-track { animation-play-state: paused; }
+/* Pause on hover OR when a user tabs into the carousel */
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
 @keyframes marquee-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
 }
 
 /* ── Nav underline animation ──────────────────────────────────── */
@@ -374,6 +378,7 @@ input[type="date"].field::-webkit-calendar-picker-indicator {
 .dish-img {
   transition: transform 0.8s var(--ease-out), filter 0.8s var(--ease-out);
   filter: saturate(0.92);
+  backface-visibility: hidden; /* Prevents blurry edges on scale */
 }
 .dish-row:hover .dish-img,
 .dish-card:hover .dish-img {
@@ -400,15 +405,31 @@ input[type="date"].field::-webkit-calendar-picker-indicator {
   35% { transform: scaleY(1); opacity: 1; }
   100% { transform: scaleY(1) translateY(28px); opacity: 0; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .scroll-line { animation: none; opacity: 0.6; transform: none; }
-}
 
-/* thin scrollbar */
+/* ── Scrollbar ────────────────────────────────────────────────── */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--p-moss) var(--p-night);
+}
+/* Webkit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--p-night); }
 ::-webkit-scrollbar-thumb {
   background: var(--p-moss);
   border-radius: 9999px;
   border: 2px solid var(--p-night);
+}
+
+/* ── Reduced Motion Fallbacks ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .grain::after { animation: none; }
+  .marquee-track { animation: none; white-space: normal; }
+  .scroll-line { animation: none; opacity: 0.6; transform: none; }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
